@@ -1,0 +1,42 @@
+[
+  {
+    "question": "What is CodeAlpha?",
+    "answer": "CodeAlpha is a leading software development company focusing on AI and emerging technologies."
+  },
+  {
+    "question": "How can I contact support?",
+    "answer": "You can reach support via email at support@codealpha.tech or through the WhatsApp number +91 9336576683."
+  },
+  {
+    "question": "What internship opportunities are available?",
+    "answer": "CodeAlpha offers AI internships that provide hands‑on experience with model development, ML workflows, and real‑time data processing."
+  },
+  {
+    "question": "How do I apply for the AI internship?",
+    "answer": "Visit www.codealpha.tech, navigate to the Careers section, and submit your application online."
+  },
+  {
+    "question": "What is the duration of the internship?",
+    "answer": "The internship runs for a single month, with a flexible schedule that can be completed remotely."
+  },
+  {
+    "question": "Is the internship paid?",
+    "answer": "Yes – interns receive a stipend and also earn a completion certificate and a letter of recommendation based on performance."
+  },
+  {
+    "question": "Do I need prior AI experience?",
+    "answer": "Basic programming knowledge (Python preferred) and a willingness to learn AI concepts are sufficient; mentors will guide you through the tasks."
+  },
+  {
+    "question": "Can I work remotely?",
+    "answer": "The internship is designed to be remote‑first; you only need an internet connection and a laptop that can run Python."
+  },
+  {
+    "question": "What tools are provided for the internship?",
+    "answer": "You will use Python, Flask for the web UI, and any standard libraries. No special hardware is required."
+  },
+  {
+    "question": "How is performance evaluated?",
+    "answer": "Mentors review the quality of your code, documentation, and the final demo video. Completing at least two tasks earns the certification."
+  }
+]

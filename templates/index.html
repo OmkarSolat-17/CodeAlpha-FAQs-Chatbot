@@ -1,0 +1,220 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FAQ Assistant</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+<div class="app">
+    <aside class="sidebar">
+        <div class="brand">
+            <div class="brand-icon">✦</div>
+            <span>FAQ<span class="accent">.AI</span></span>
+        </div>
+
+        <button class="new-chat" onclick="clearChat()">＋ New conversation</button>
+
+        <div class="sidebar-section">
+            <p class="section-label">YOUR ASSISTANT</p>
+            <div class="sidebar-item active">
+                <span>◈</span> FAQ Support
+            </div>
+            <div class="sidebar-item">
+                <span>⌁</span> Knowledge Base
+            </div>
+        </div>
+
+        <div class="sidebar-bottom">
+            <div class="profile">
+                <div class="avatar">AI</div>
+                <div>
+                    <strong>FAQ Assistant</strong>
+                    <small>AI-powered support</small>
+                </div>
+                <span class="online"></span>
+            </div>
+        </div>
+    </aside>
+
+    <main class="main">
+        <header class="topbar">
+            <div class="topbar-title">
+                <div class="mobile-brand">✦ FAQ.AI</div>
+                <div class="bot-avatar">✦</div>
+                <div>
+                    <h3>FAQ Assistant</h3>
+                    <p><span class="online"></span> Online · Ready to help</p>
+                </div>
+            </div>
+            <div class="topbar-tag">NLP POWERED <span>✧</span></div>
+        </header>
+
+        <section class="chat-area" id="chat">
+            <div class="welcome" id="welcome">
+                <div class="welcome-symbol">✦</div>
+                <div class="welcome-label">YOUR AI SUPPORT ASSISTANT</div>
+                <h1>How can I help<br>you <span>today?</span></h1>
+                <p>Ask me anything. I'll find the most relevant answer<br class="desktop"> from our frequently asked questions.</p>
+
+                <div class="suggestions">
+                    <button onclick="askSuggestion(this)">What can you help me with? <span>↗</span></button>
+                    <button onclick="askSuggestion(this)">How does this chatbot work? <span>↗</span></button>
+                    <button onclick="askSuggestion(this)">Show me some frequently asked questions <span>↗</span></button>
+                    <button onclick="askSuggestion(this)">I need more information <span>↗</span></button>
+                </div>
+            </div>
+        </section>
+
+        <div class="composer-wrap">
+            <div class="composer">
+                <input id="question" type="text" placeholder="Message your FAQ assistant..." autocomplete="off">
+                <button id="send" aria-label="Send message">↑</button>
+            </div>
+            <div class="composer-note">AI responses are based on the available FAQ knowledge base.</div>
+        </div>
+    </main>
+</div>
+
+<script>
+const chatDiv = document.getElementById('chat');
+const questionInput = document.getElementById('question');
+const sendBtn = document.getElementById('send');
+const welcome = document.getElementById('welcome');
+
+function addMessage(text, from) {
+    welcome?.remove();
+
+    const row = document.createElement('div');
+    row.className = 'message-row ' + from;
+
+    const avatar = document.createElement('div');
+    avatar.className = from === 'bot' ? 'message-avatar bot-avatar' : 'message-avatar user-avatar';
+    avatar.textContent = from === 'bot' ? '✦' : 'You';
+
+    const group = document.createElement('div');
+    group.className = 'message-group';
+
+    const label = document.createElement('div');
+    label.className = 'message-label';
+    label.textContent = from === 'bot' ? 'FAQ Assistant' : 'You';
+
+    const bubble = document.createElement('div');
+    bubble.className = 'bubble';
+    bubble.textContent = text;
+
+    group.appendChild(label);
+    group.appendChild(bubble);
+
+    if (from === 'bot') {
+        const actions = document.createElement('div');
+        actions.className = 'message-actions';
+
+        const copy = document.createElement('button');
+        copy.textContent = '▢ Copy';
+        copy.onclick = async () => {
+            try {
+                await navigator.clipboard.writeText(text);
+                copy.textContent = '✓ Copied';
+                setTimeout(() => copy.textContent = '▢ Copy', 1500);
+            } catch {
+                copy.textContent = 'Copy unavailable';
+            }
+        };
+
+        const speak = document.createElement('button');
+        speak.textContent = '◖ Speak';
+        speak.onclick = () => {
+            if (!('speechSynthesis' in window)) return;
+            speechSynthesis.cancel();
+            speechSynthesis.speak(new SpeechSynthesisUtterance(text));
+        };
+
+        actions.append(copy, speak);
+        group.appendChild(actions);
+    }
+
+    row.append(avatar, group);
+    chatDiv.appendChild(row);
+    chatDiv.scrollTop = chatDiv.scrollHeight;
+}
+
+function showTyping() {
+    const typing = document.createElement('div');
+    typing.className = 'message-row bot';
+    typing.id = 'typing';
+
+    const avatar = document.createElement('div');
+    avatar.className = 'message-avatar bot-avatar';
+    avatar.textContent = '✦';
+
+    const dots = document.createElement('div');
+    dots.className = 'typing-bubble';
+    dots.innerHTML = '<span></span><span></span><span></span>';
+
+    typing.append(avatar, dots);
+    chatDiv.appendChild(typing);
+    chatDiv.scrollTop = chatDiv.scrollHeight;
+}
+
+async function sendMessage() {
+    const q = questionInput.value.trim();
+    if (!q || sendBtn.disabled) return;
+
+    addMessage(q, 'user');
+    questionInput.value = '';
+    sendBtn.disabled = true;
+    showTyping();
+
+    try {
+        const resp = await fetch('/ask', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ question: q })
+        });
+
+        const data = await resp.json();
+        document.getElementById('typing')?.remove();
+        addMessage(data.answer || 'I could not find an answer.', 'bot');
+    } catch (e) {
+        document.getElementById('typing')?.remove();
+        addMessage('Unable to connect to the server. Please try again.', 'bot');
+    } finally {
+        sendBtn.disabled = false;
+        questionInput.focus();
+    }
+}
+
+function askSuggestion(button) {
+    questionInput.value = button.textContent.replace('↗', '').trim();
+    sendMessage();
+}
+
+function clearChat() {
+    chatDiv.innerHTML = '';
+    const welcomeHTML = `
+      <div class="welcome" id="welcome">
+        <div class="welcome-symbol">✦</div>
+        <div class="welcome-label">YOUR AI SUPPORT ASSISTANT</div>
+        <h1>How can I help<br>you <span>today?</span></h1>
+        <p>Ask me anything. I'll find the most relevant answer<br class="desktop"> from our frequently asked questions.</p>
+        <div class="suggestions">
+          <button onclick="askSuggestion(this)">What can you help me with? <span>↗</span></button>
+          <button onclick="askSuggestion(this)">How does this chatbot work? <span>↗</span></button>
+          <button onclick="askSuggestion(this)">Show me some frequently asked questions <span>↗</span></button>
+          <button onclick="askSuggestion(this)">I need more information <span>↗</span></button>
+        </div>
+      </div>`;
+    chatDiv.innerHTML = welcomeHTML;
+}
+
+sendBtn.addEventListener('click', sendMessage);
+questionInput.addEventListener('keydown', e => {
+    if (e.key === 'Enter') sendMessage();
+});
+</script>
+</body>
+</html>
